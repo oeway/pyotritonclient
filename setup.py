@@ -50,18 +50,13 @@ except ImportError:
 this_directory = os.path.abspath(os.path.dirname(__file__))
 
 
-def req_file(filename, folder="requirements"):
-    with open(os.path.join(folder, filename)) as f:
+def req_file(filename):
+    with open(filename) as f:
         content = f.readlines()
     return [x.strip() for x in content if not x.startswith("#")]
 
 
 install_requires = req_file("requirements.txt")
-extras_require = {
-    'http': req_file("requirements_http.txt"),
-}
-
-extras_require['all'] = list(chain(extras_require.values()))
 
 data_files = [
     ("", ["LICENSE.txt"]),
@@ -69,7 +64,7 @@ data_files = [
 
 setup(
     name='tritonclient-slim',
-    version='0.1.0pre',
+    version='0.1.0rc0',
     author='Wei OUYANG',
     author_email='oeway007@gmail.com',
     description=
@@ -108,7 +103,6 @@ setup(
         'Operating System :: OS Independent',
     ],
     install_requires=install_requires,
-    extras_require=extras_require,
     packages=find_packages(),
     zip_safe=False,
     cmdclass={'bdist_wheel': bdist_wheel},
