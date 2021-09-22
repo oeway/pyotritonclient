@@ -1,4 +1,4 @@
-# Slim Triton HTTP Client
+# Triton HTTP Client for Pyodide
 
 A Pyodide python http client library and utilities for communicating with Triton Inference Server (based on tritonclient from NVIDIA).
 
