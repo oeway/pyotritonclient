@@ -64,7 +64,7 @@ data_files = [
 
 setup(
     name='pyotritonclient',
-    version='0.1.0rc1',
+    version='0.1.0rc2',
     author='Wei OUYANG',
     author_email='oeway007@gmail.com',
     description=
