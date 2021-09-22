@@ -20,7 +20,7 @@ class HTTPResponse():
         # then convert to bytearray
         return self._body_buffer[:length].tobytes()
 
-class PyodideHttpClient():
+class pyohttpclient():
     def close(self):
         pass
 

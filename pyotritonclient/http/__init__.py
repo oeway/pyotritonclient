@@ -24,28 +24,21 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from urllib.parse import quote, quote_plus
+import json
+import numpy as np
+import struct
+import gzip, zlib
+
+from pyotritonclient.utils import *
+
 try:
-    from urllib.parse import quote, quote_plus
-    import json
-    import numpy as np
-    import struct
-    import gzip, zlib
+    import pyodide
+    from pyotritonclient.http.pyohttpclient import pyohttpclient
+    IS_PYODIDE = True
 except ModuleNotFoundError as error:
-    print(error)
-    raise RuntimeError(
-        'The installation does not include http support. Specify \'http\' or \'all\' while installing the tritonclient package to include the support'
-    ) from error
-
-from tritonclient.utils import *
-
-# try:
-#     import pyodide
-#     from tritonclient.http.pyodidehttpclient import PyodideHttpClient
-#     IS_PYODIDE = True
-# except ModuleNotFoundError as error:
-#     IS_PYODIDE = False
-from tritonclient.http.pyodidehttpclient import PyodideHttpClient
-IS_PYODIDE = True
+    IS_PYODIDE = False
+    print("WARINING: The pyotritonclient library is meant to be used within Pyodide.")
 
 def _get_error(response):
     """
@@ -171,7 +164,7 @@ class InferenceServerClient:
                  verbose=False):
         self._base_uri = 'https://' if ssl else 'http://' + base_uri.rstrip('/')
         if async_http_client is None and IS_PYODIDE:
-            async_http_client = PyodideHttpClient()
+            async_http_client = pyohttpclient()
         self._client_stub = async_http_client
         self._verbose = verbose
 

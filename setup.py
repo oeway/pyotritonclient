@@ -63,12 +63,12 @@ data_files = [
 ]
 
 setup(
-    name='tritonclient-slim',
+    name='pyotritonclient',
     version='0.1.0rc0',
     author='Wei OUYANG',
     author_email='oeway007@gmail.com',
     description=
-    "A simplified python http client library and utilities for communicating with Triton Inference Server (based on tritonclient from NVIDIA)",
+    "A Pyodide python http client library and utilities for communicating with Triton Inference Server (based on tritonclient from NVIDIA)",
     long_description=
     """This is a simplified implemetation of the triton client from NVIDIA, it is mainly made for running in the web browser with pyodide."""
     """It only implement the http client, and most of the API remains the same but changed into async."""
