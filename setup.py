@@ -25,30 +25,8 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import os
-
 from setuptools import find_packages
 from setuptools import setup
-from itertools import chain
-
-PLATFORM_FLAG = 'any'
-
-try:
-    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
-
-    class bdist_wheel(_bdist_wheel):
-
-        def finalize_options(self):
-            _bdist_wheel.finalize_options(self)
-            self.root_is_pure = False
-
-        def get_tag(self):
-            pyver, abi, plat = 'py3', 'none', PLATFORM_FLAG
-            return pyver, abi, plat
-except ImportError:
-    bdist_wheel = None
-
-this_directory = os.path.abspath(os.path.dirname(__file__))
-
 
 def req_file(filename):
     with open(filename) as f:
@@ -64,7 +42,7 @@ data_files = [
 
 setup(
     name='pyotritonclient',
-    version='0.1.0rc2',
+    version='0.1.0rc3',
     author='Wei OUYANG',
     author_email='oeway007@gmail.com',
     description=
@@ -105,6 +83,5 @@ setup(
     install_requires=install_requires,
     packages=find_packages(),
     zip_safe=False,
-    cmdclass={'bdist_wheel': bdist_wheel},
     data_files=data_files,
 )
