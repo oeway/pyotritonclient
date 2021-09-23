@@ -2,43 +2,81 @@ import json
 from pyodide import to_js
 from js import Object, fetch
 
-class HTTPResponse():
-    def __init__(self, js_response, body_buffer, method='GET'):
+
+class HTTPResponse:
+    def __init__(self, js_response, body_buffer, method="GET"):
         self.method = method.upper()
         self.status_message = None
+        self.status_code = js_response.status
+        self.msg = js_response.statusText
         self._js_response = js_response
         self._body_buffer = body_buffer
+        self._buffer_pointer = 0
 
     def __getitem__(self, key):
+        # Make sure we don't expose the Content-Encoding header in the browser
+        if key.lower() == "content-encoding":
+            return None
         return self._js_response.headers.get(key)
 
     def get(self, key, default=None):
+        # Make sure we don't expose the Content-Encoding header in the browser
+        if key.lower() == "content-encoding":
+            return default
         return self._js_response.headers.get(key) or default
 
-    async def read(self, length=None):
+    def read(self, length=None):
+
+        if self._buffer_pointer >= len(self._body_buffer):
+            raise EOFError
+        end = None if length is None else self._buffer_pointer + length
         # convert such a proxy to a Python memoryview using the to_py api
         # then convert to bytearray
-        return self._body_buffer[:length].tobytes()
+        ret = self._body_buffer[self._buffer_pointer : end].tobytes()
+        self._buffer_pointer += len(ret)
+        return ret
 
-class pyohttpclient():
+
+class PyoHttpClient:
+    def __init__(self, base_uri):
+        self._base_uri = base_uri
+        if not self._base_uri.startswith("http"):
+            raise Exception("Please configure base URI for the http client.")
+
     def close(self):
-        pass
+        print("Close http client.")
 
-    async def get(self, uri, headers=None):
-        resp = await fetch(uri, to_js({
-            "method": "GET",
-            "headers": headers
-        }, dict_converter=Object.fromEntries))
+    def _normalize_uri(self, request_uri):
+        if not request_uri.startswith("http"):
+            request_uri = self._base_uri.rstrip("/") + "/" + request_uri.lstrip("/")
+        return request_uri
+
+    async def get(self, request_uri, headers=None):
+        request_uri = self._normalize_uri(request_uri)
+        resp = await fetch(
+            request_uri,
+            to_js(
+                {"method": "GET", "headers": headers}, dict_converter=Object.fromEntries
+            ),
+        )
         _body_buffer = await resp.arrayBuffer()
         return HTTPResponse(resp, _body_buffer.to_py())
 
-    async def post(self, uri, body=None, headers=None):
+    async def post(self, request_uri, body=None, headers=None):
+        request_uri = self._normalize_uri(request_uri)
         if isinstance(body, dict):
             body = json.dumps(body)
-        resp = await fetch(uri, to_js({
-            "method": "POST",
-            "body": body,
-            "headers": headers
-        }, dict_converter=Object.fromEntries))
+        elif isinstance(body, bytes):
+            body = to_js(body)  # this is Uint8Array
+        elif isinstance(body, str):
+            raise TypeError("Unsupported type: " + str(type(body)))
+
+        resp = await fetch(
+            request_uri,
+            to_js(
+                {"method": "POST", "body": body, "headers": headers},
+                dict_converter=Object.fromEntries,
+            ),
+        )
         _body_buffer = await resp.arrayBuffer()
         return HTTPResponse(resp, _body_buffer.to_py())

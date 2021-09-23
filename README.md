@@ -8,7 +8,9 @@ It only implement the http client, and most of the API remains the same but chan
 
 To install it, run `pip install pyotritonclient`
 
-You can find the official [client examples](https://github.com/triton-inference-server/client/tree/main/src/python/examples) demonstrate how to use the 
+To use it in Pyodie, see the [test example](./tests/test_client.py).
+
+You can also find the official [client examples](https://github.com/triton-inference-server/client/tree/main/src/python/examples) demonstrate how to use the 
 package to issue request to [triton inference server](https://github.com/triton-inference-server/server). However, please notice that you will need to
 change the http client code into async style. For example, instead of doing `client.infer(...)`, you need to do `await client.infer(...)`.
 

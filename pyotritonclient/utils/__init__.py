@@ -51,11 +51,11 @@ def serialized_byte_size(tensor_value):
     """
 
     if tensor_value.dtype != np.object_:
-        raise_error('The tensor_value dtype must be np.object_')
+        raise_error("The tensor_value dtype must be np.object_")
 
     if tensor_value.size > 0:
         total_bytes = 0
-        for obj in np.nditer(tensor_value, flags=["refs_ok"], order='C'):
+        for obj in np.nditer(tensor_value, flags=["refs_ok"], order="C"):
             total_bytes += len(obj.item())
         return total_bytes
     else:
@@ -86,7 +86,7 @@ class InferenceServerException(Exception):
     def __str__(self):
         msg = super().__str__() if self._msg is None else self._msg
         if self._status is not None:
-            msg = '[' + self._status + '] ' + msg
+            msg = "[" + self._status + "] " + msg
         return msg
 
     def message(self):
@@ -214,10 +214,9 @@ def serialize_byte_tensor(input_tensor):
     # a 1-dimensional array containing the 4-byte byte size followed by the
     # actual element bytes. All elements are concatenated together in "C"
     # order.
-    if (input_tensor.dtype == np.object_) or (input_tensor.dtype.type
-                                              == np.bytes_):
+    if (input_tensor.dtype == np.object_) or (input_tensor.dtype.type == np.bytes_):
         flattened_ls = []
-        for obj in np.nditer(input_tensor, flags=["refs_ok"], order='C'):
+        for obj in np.nditer(input_tensor, flags=["refs_ok"], order="C"):
             # If directly passing bytes to BYTES type,
             # don't convert it to str as Python will encode the
             # bytes which may distort the meaning
@@ -225,16 +224,15 @@ def serialize_byte_tensor(input_tensor):
                 if type(obj.item()) == bytes:
                     s = obj.item()
                 else:
-                    s = str(obj.item()).encode('utf-8')
+                    s = str(obj.item()).encode("utf-8")
             else:
                 s = obj.item()
             flattened_ls.append(struct.pack("<I", len(s)))
             flattened_ls.append(s)
-        flattened = b''.join(flattened_ls)
+        flattened = b"".join(flattened_ls)
         flattened_array = np.asarray(flattened, dtype=np.object_)
-        if not flattened_array.flags['C_CONTIGUOUS']:
-            flattened_array = np.ascontiguousarray(flattened_array,
-                                                   dtype=np.object_)
+        if not flattened_array.flags["C_CONTIGUOUS"]:
+            flattened_array = np.ascontiguousarray(flattened_array, dtype=np.object_)
         return flattened_array
     else:
         raise_error("cannot serialize bytes tensor: invalid datatype")
@@ -257,7 +255,7 @@ def deserialize_bytes_tensor(encoded_tensor):
     string_tensor : np.array
         The 1-D numpy array of type object containing the
         deserialized bytes in 'C' order.
-   
+
     """
     strs = list()
     offset = 0
@@ -268,4 +266,4 @@ def deserialize_bytes_tensor(encoded_tensor):
         sb = struct.unpack_from("<{}s".format(l), val_buf, offset)[0]
         offset += l
         strs.append(sb)
-    return (np.array(strs, dtype=np.object_))
+    return np.array(strs, dtype=np.object_)
