@@ -21,6 +21,8 @@ If you want to use outside pyodide, run `pip install pyotritonclient`. However, 
 ## Usage
 We provide utility functions to simplify the access:
 ```python
+import numpy as np
+from pyotritonclient import get_config, execute_model
 
 # obtain the model config
 config = await get_config('https://triton.imjoy.io', 'cellpose-cyto')
