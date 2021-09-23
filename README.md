@@ -28,7 +28,7 @@ config = await get_config('https://triton.imjoy.io', 'cellpose-cyto')
 
 # create fake input tensors
 input0 = np.zeros([2, 349, 467], dtype='float32')
-input1 = np.zeros([30], dtype='float32')
+input1 = np.array([30], dtype='float32')
 # run inference
 results = await execute_model([input0, input1], config=config)
 ```
