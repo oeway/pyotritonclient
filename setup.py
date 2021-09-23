@@ -28,8 +28,10 @@ import os
 from setuptools import find_packages
 from setuptools import setup
 
+
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
+
 
 def req_file(filename):
     with open(filename) as f:
@@ -45,11 +47,11 @@ data_files = [
 
 setup(
     name="pyotritonclient",
-    version="0.1.1",
+    version="0.1.2",
     author="Wei OUYANG",
     author_email="oeway007@gmail.com",
     description="A Pyodide python http client library and utilities for communicating with Triton Inference Server (based on tritonclient from NVIDIA)",
-    long_description=read('README.md'),
+    long_description=read("README.md"),
     long_description_content_type="text/markdown",
     license="BSD",
     url="https://developer.nvidia.com/nvidia-triton-inference-server",

@@ -23,7 +23,7 @@ async def execute_model(
     request_id="",
     model_version="",
     compression_algorithm="deflate",
-    verbose=False
+    verbose=False,
 ):
     """
     Function for execute the model by passing a list of input tensors
@@ -83,7 +83,10 @@ async def execute_model(
             response_compression_algorithm=compression_algorithm,
         )
 
-        return {
+        results = {
             output["name"]: results.as_numpy(output["name"])
             for output in results._result["outputs"]
         }
+
+        results["__response__"] = results.get_response()
+        return results
