@@ -47,7 +47,7 @@ data_files = [
 
 setup(
     name="pyotritonclient",
-    version="0.1.2",
+    version="0.1.3",
     author="Wei OUYANG",
     author_email="oeway007@gmail.com",
     description="A Pyodide python http client library and utilities for communicating with Triton Inference Server (based on tritonclient from NVIDIA)",
@@ -56,6 +56,7 @@ setup(
     license="BSD",
     url="https://developer.nvidia.com/nvidia-triton-inference-server",
     keywords=[
+        "pyodide",
         "http",
         "triton",
         "tensorrt",

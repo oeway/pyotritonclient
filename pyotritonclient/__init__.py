@@ -73,7 +73,7 @@ async def execute_model(
             if output_names[i] in select_outputs
         ]
 
-        results = await client.infer(
+        response = await client.infer(
             model_name,
             infer_inputs,
             model_version=model_version,
@@ -83,10 +83,11 @@ async def execute_model(
             response_compression_algorithm=compression_algorithm,
         )
 
+        info = response.get_response()
         results = {
-            output["name"]: results.as_numpy(output["name"])
-            for output in results._result["outputs"]
+            output["name"]: response.as_numpy(output["name"])
+            for output in info["outputs"]
         }
 
-        results["__response__"] = results.get_response()
+        results["__info__"] = info
         return results
