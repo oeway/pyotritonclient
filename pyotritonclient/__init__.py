@@ -3,11 +3,11 @@ from pyotritonclient.utils import np_to_triton_dtype, triton_to_np_dtype
 import pyotritonclient.http as httpclient
 
 
-async def get_config(server_url, model_name):
+async def get_config(server_url, model_name, verbose=False):
     """
     Function for getting model config
     """
-    with httpclient.InferenceServerClient(server_url, verbose=True) as client:
+    with httpclient.InferenceServerClient(server_url, verbose=verbose) as client:
         response = await client.get_model_config(model_name)
         response["server_url"] = server_url
         response["model_name"] = model_name
@@ -23,6 +23,7 @@ async def execute_model(
     request_id="",
     model_version="",
     compression_algorithm="deflate",
+    verbose=False
 ):
     """
     Function for execute the model by passing a list of input tensors
@@ -57,7 +58,7 @@ async def execute_model(
     else:
         select_outputs = output_names
 
-    with httpclient.InferenceServerClient(server_url, verbose=True) as client:
+    with httpclient.InferenceServerClient(server_url, verbose=verbose) as client:
         infer_inputs = [
             httpclient.InferInput(input_names[i], inputs[i].shape, input_types[i])
             for i in range(len(inputs))

@@ -6,10 +6,11 @@ A Pyodide python http client library and utilities for communicating with Triton
 This is a simplified implemetation of the triton client from NVIDIA, it is mainly made for running in the web browser with pyodide.
 It only implement the http client, and most of the API remains the same but changed into async.
 
+## Usage
 
-## Installation
+You can used it in Pyodide based environment, for example: [Pyodide console](https://pyodide-cdn2.iodide.io/dev/full/console.html) or [JupyterLite](https://jupyterlite.readthedocs.io/en/latest/_static/lab/index.html).
 
-To install it in Pyodide:
+For example in a JupyterLite notebook, you can install the client by running:
 ```python
 import micropip
 micropip.install("pyotritonclient")
@@ -17,9 +18,7 @@ micropip.install("pyotritonclient")
 
 If you want to use outside pyodide, run `pip install pyotritonclient`. However, please note that you will need to provide your own http_client class.
 
-
-## Usage
-We provide utility functions to simplify the access:
+To execute the model, we provide utility functions to make it much easier:
 ```python
 import numpy as np
 from pyotritonclient import get_config, execute_model
@@ -33,8 +32,8 @@ input1 = np.zeros([30], dtype='float32')
 # run inference
 results = await execute_model([input0, input1], config=config)
 ```
-To use it in Pyodie, see the [test example](./tests/test_client.py).
 
+You can access the lower level api, see the [test example](./tests/test_client.py).
 
 You can also find the official [client examples](https://github.com/triton-inference-server/client/tree/main/src/python/examples) demonstrate how to use the 
 package to issue request to [triton inference server](https://github.com/triton-inference-server/server). However, please notice that you will need to

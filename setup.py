@@ -45,7 +45,7 @@ data_files = [
 
 setup(
     name="pyotritonclient",
-    version="0.1.0",
+    version="0.1.1",
     author="Wei OUYANG",
     author_email="oeway007@gmail.com",
     description="A Pyodide python http client library and utilities for communicating with Triton Inference Server (based on tritonclient from NVIDIA)",
