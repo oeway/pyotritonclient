@@ -44,7 +44,7 @@ class PyoHttpClient:
             raise Exception("Please configure base URI for the http client.")
 
     def close(self):
-        print("Close http client.")
+        pass
 
     def _normalize_uri(self, request_uri):
         if not request_uri.startswith("http"):
