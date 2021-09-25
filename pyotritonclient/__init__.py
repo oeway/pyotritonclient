@@ -1,3 +1,4 @@
+import json
 import numpy as np
 from pyotritonclient.utils import np_to_triton_dtype, triton_to_np_dtype
 import pyotritonclient.http as httpclient
@@ -23,6 +24,7 @@ async def execute_model(
     request_id="",
     model_version="",
     compression_algorithm="deflate",
+    decode_bytes=False,
     verbose=False,
 ):
     """
@@ -43,13 +45,29 @@ async def execute_model(
     ), f"Invalid inputs number: {len(inputs)}, it should be {len(inputc)}"
     input_names = [inputc[i]["name"] for i in range(len(inputc))]
     output_names = [outputc[i]["name"] for i in range(len(outputc))]
-    input_types = [inputc[i]["data_type"].lstrip("TYPE_") for i in range(len(inputc))]
+    input_types = [
+        inputc[i]["data_type"].lstrip("TYPE_").replace("STRING", "BYTES")
+        for i in range(len(inputc))
+    ]
 
     for i in range(len(inputs)):
+        # automatically encode string and dict into np.bytes_
+        if isinstance(inputs[i], str):
+            bytes_data = str.encode(inputs[i], "utf-8")
+            inputs[i] = np.array([bytes_data], dtype=np.object_)
+        if isinstance(inputs[i], dict):
+            # encode the dictionary as as np.object_
+            bytes_data = str.encode(json.dumps(inputs[i]), "utf-8")
+            inputs[i] = np.array([bytes_data], dtype=np.object_)
+
         if inputs[i].dtype != triton_to_np_dtype(input_types[i]):
-            raise TypeError(
-                f"Input ({i}) data type mismatch: {inputs[i].dtype} (should be {triton_to_np_dtype(input_types[i])})"
-            )
+            if not (
+                inputs[i].dtype == np.bytes_
+                and triton_to_np_dtype(input_types[i]) == np.object_
+            ):
+                raise TypeError(
+                    f"Input ({i}: {input_names[i]}) data type mismatch: {inputs[i].dtype} (should be {triton_to_np_dtype(input_types[i])})"
+                )
 
     if select_outputs:
         for out in select_outputs:
@@ -88,6 +106,16 @@ async def execute_model(
             output["name"]: response.as_numpy(output["name"])
             for output in info["outputs"]
         }
+
+        if decode_bytes:
+            for k in results:
+                # decode bytes to utf-8
+                if results[k].dtype == np.object_:
+                    results[k] = results[k].astype(np.bytes_)
+                    results[k] = [
+                        str(np.char.decode(results[k][i], "UTF-8"))
+                        for i in range(len(results[k]))
+                    ]
 
         results["__info__"] = info
         return results
