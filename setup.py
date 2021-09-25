@@ -41,13 +41,18 @@ def req_file(filename):
 
 install_requires = req_file("requirements.txt")
 
+try:
+    import pyodide
+except:
+    install_requires.append("requests")
+
 data_files = [
     ("", ["LICENSE.txt"]),
 ]
 
 setup(
     name="pyotritonclient",
-    version="0.1.5",
+    version="0.1.6",
     author="Wei OUYANG",
     author_email="oeway007@gmail.com",
     description="A Pyodide python http client library and utilities for communicating with Triton Inference Server (based on tritonclient from NVIDIA)",

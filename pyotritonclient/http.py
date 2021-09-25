@@ -34,12 +34,13 @@ from pyotritonclient.utils import *
 
 try:
     import pyodide
-    from pyotritonclient.http.pyohttpclient import PyoHttpClient
+    from pyotritonclient.pyohttpclient import PyoHttpClient as HttpClient
 
     IS_PYODIDE = True
 except ModuleNotFoundError as error:
+    from pyotritonclient.httpxclient import HttpXClient as HttpClient
+
     IS_PYODIDE = False
-    print("WARINING: The pyotritonclient library is meant to be used within Pyodide.")
 
 
 def _get_error(response):
@@ -173,12 +174,12 @@ class InferenceServerClient:
             self._base_uri = base_uri
             self._base_uri = self._base_uri.rstrip("/")
 
-        if self._base_uri.startswith("http:"):
+        if IS_PYODIDE and self._base_uri.startswith("http:"):
             print(
                 "Note: The browser might block insecure http connection, please use https if possible."
             )
-        if async_http_client is None and IS_PYODIDE:
-            async_http_client = PyoHttpClient(self._base_uri)
+        if async_http_client is None:
+            async_http_client = HttpClient(self._base_uri)
         self._client_stub = async_http_client
         self._verbose = verbose
 
@@ -1195,7 +1196,7 @@ class InferenceServerClient:
         if json_size is not None:
             if headers is None:
                 headers = {}
-            headers["Inference-Header-Content-Length"] = json_size
+            headers["Inference-Header-Content-Length"] = str(json_size)
 
         if type(model_version) != str:
             raise_error("model version must be a string")
