@@ -34,11 +34,11 @@ from pyotritonclient.utils import *
 
 try:
     import pyodide
-    from pyotritonclient.pyohttpclient import PyoHttpClient as HttpClient
+    from pyotritonclient.pyohttpclient import HttpClient
 
     IS_PYODIDE = True
 except ModuleNotFoundError as error:
-    from pyotritonclient.httpxclient import HttpXClient as HttpClient
+    from pyotritonclient.httpclient import HttpClient
 
     IS_PYODIDE = False
 

@@ -38,7 +38,7 @@ class HTTPResponse:
         return ret
 
 
-class HttpXClient:
+class HttpClient:
     def __init__(self, base_uri):
         self._base_uri = base_uri
         if not self._base_uri.startswith("http"):
