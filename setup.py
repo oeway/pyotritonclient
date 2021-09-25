@@ -45,6 +45,7 @@ try:
     import pyodide
 except:
     install_requires.append("requests")
+    install_requires.append("python-rapidjson>=0.9.1")
 
 data_files = [
     ("", ["LICENSE.txt"]),
@@ -52,7 +53,7 @@ data_files = [
 
 setup(
     name="pyotritonclient",
-    version="0.1.7",
+    version="0.1.8",
     author="Wei OUYANG",
     author_email="oeway007@gmail.com",
     description="A Pyodide python http client library and utilities for communicating with Triton Inference Server (based on tritonclient from NVIDIA)",

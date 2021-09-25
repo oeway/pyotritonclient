@@ -25,7 +25,6 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from urllib.parse import quote, quote_plus
-import json
 import numpy as np
 import struct
 import gzip, zlib
@@ -41,6 +40,11 @@ except ModuleNotFoundError as error:
     from pyotritonclient.httpclient import HttpClient
 
     IS_PYODIDE = False
+
+try:
+    import rapidjson as json
+except ModuleNotFoundError as error:
+    import json
 
 
 def _get_error(response):
