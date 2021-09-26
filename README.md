@@ -8,9 +8,9 @@ It only implement the http client, and most of the API remains the similar but c
 
 ## Usage
 
-To use it in Python, you need to first install it with pip:
+To use it in native CPython, you can install the package by running:
 ```
-pip install pyotritonclient
+pip install pyotritonclient[native]
 ```
 
 For Pyodide-based Python environment, for example: [JupyterLite](https://jupyterlite.readthedocs.io/en/latest/_static/lab/index.html) or [Pyodide console](https://pyodide-cdn2.iodide.io/dev/full/console.html), you can install the client by running the following python code:

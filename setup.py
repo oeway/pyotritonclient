@@ -41,19 +41,13 @@ def req_file(filename):
 
 install_requires = req_file("requirements.txt")
 
-try:
-    import pyodide
-except:
-    install_requires.append("requests")
-    install_requires.append("python-rapidjson>=0.9.1")
-
 data_files = [
     ("", ["LICENSE.txt"]),
 ]
 
 setup(
     name="pyotritonclient",
-    version="0.1.8",
+    version="0.1.11",
     author="Wei OUYANG",
     author_email="oeway007@gmail.com",
     description="A Pyodide python http client library and utilities for communicating with Triton Inference Server (based on tritonclient from NVIDIA)",
@@ -92,6 +86,9 @@ setup(
         "Operating System :: OS Independent",
     ],
     install_requires=install_requires,
+    extras_require={
+        "native": ["requests", "python-rapidjson>=0.9.1"],
+    },
     packages=find_packages(),
     zip_safe=False,
     data_files=data_files,
