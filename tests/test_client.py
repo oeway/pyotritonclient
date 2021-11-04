@@ -7,7 +7,7 @@ from pyotritonclient import get_config, execute_model
 
 async def run():
     # obtain the model config
-    config = await get_config("https://triton.imjoy.io", "stardist")
+    config = await get_config("https://ai.imjoy.io/triton", "stardist")
 
     image = imageio.imread(
         "https://raw.githubusercontent.com/stardist/stardist/3451a4f9e7b6dcef91b09635cc8fa78939fb0d29/stardist/data/images/img2d.tif"

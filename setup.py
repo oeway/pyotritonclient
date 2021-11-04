@@ -25,6 +25,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import os
+import json
 from setuptools import find_packages
 from setuptools import setup
 
@@ -40,6 +41,8 @@ def req_file(filename):
 
 
 install_requires = req_file("requirements.txt")
+VERSION = json.loads(read("pyotritonclient/VERSION"))["version"]
+
 
 data_files = [
     ("", ["LICENSE.txt"]),
@@ -47,7 +50,7 @@ data_files = [
 
 setup(
     name="pyotritonclient",
-    version="0.1.11",
+    version=VERSION,
     author="Wei OUYANG",
     author_email="oeway007@gmail.com",
     description="A Pyodide python http client library and utilities for communicating with Triton Inference Server (based on tritonclient from NVIDIA)",

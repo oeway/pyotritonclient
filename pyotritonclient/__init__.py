@@ -1,7 +1,10 @@
 import json
+from pathlib import Path
+
 import numpy as np
-from pyotritonclient.utils import np_to_triton_dtype, triton_to_np_dtype
+
 import pyotritonclient.http as httpclient
+from pyotritonclient.utils import np_to_triton_dtype, triton_to_np_dtype
 
 
 async def get_config(server_url, model_name, verbose=False):
@@ -119,3 +122,10 @@ async def execute_model(
 
         results["__info__"] = info
         return results
+
+
+# read version information from file
+VERSION_INFO = json.loads(
+    (Path(__file__).parent / "VERSION").read_text(encoding="utf-8").strip()
+)
+__version__ = VERSION_INFO["version"]
