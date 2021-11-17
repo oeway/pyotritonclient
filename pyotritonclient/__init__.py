@@ -29,6 +29,7 @@ async def execute_model(
     compression_algorithm="deflate",
     decode_bytes=False,
     verbose=False,
+    **kwargs,
 ):
     """
     Function for execute the model by passing a list of input tensors
@@ -102,6 +103,7 @@ async def execute_model(
             outputs=outputs,
             request_compression_algorithm=compression_algorithm,
             response_compression_algorithm=compression_algorithm,
+            **kwargs,
         )
 
         info = response.get_response()
