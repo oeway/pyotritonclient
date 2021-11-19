@@ -43,6 +43,10 @@ def req_file(filename):
 install_requires = req_file("requirements.txt")
 VERSION = json.loads(read("pyotritonclient/VERSION"))["version"]
 
+try:
+    import pyodide
+except ImportError:
+    install_requires.extend(["requests", "python-rapidjson>=0.9.1"])
 
 data_files = [
     ("", ["LICENSE.txt"]),
@@ -53,11 +57,11 @@ setup(
     version=VERSION,
     author="Wei OUYANG",
     author_email="oeway007@gmail.com",
-    description="A Pyodide python http client library and utilities for communicating with Triton Inference Server (based on tritonclient from NVIDIA)",
+    description="A lightweight http client library for communicating with Nvidia Triton Inference Server (with Pyodide support in the browser)",
     long_description=read("README.md"),
     long_description_content_type="text/markdown",
     license="BSD",
-    url="https://developer.nvidia.com/nvidia-triton-inference-server",
+    url="https://github.com/oeway/pyotritonclient",
     keywords=[
         "pyodide",
         "http",
@@ -89,9 +93,6 @@ setup(
         "Operating System :: OS Independent",
     ],
     install_requires=install_requires,
-    extras_require={
-        "native": ["requests", "python-rapidjson>=0.9.1"],
-    },
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
