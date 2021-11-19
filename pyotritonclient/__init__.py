@@ -17,6 +17,7 @@ async def get_config(server_url, model_name, verbose=False):
         response["model_name"] = model_name
         return response
 
+
 def _encode_input(data):
     # automatically encode string and dict into np.bytes_
     if isinstance(data, str):
@@ -31,6 +32,7 @@ def _encode_input(data):
     else:
         in_data = data
     return in_data
+
 
 async def execute_model(
     inputs,
@@ -67,7 +69,9 @@ async def execute_model(
         inputc[i]["data_type"].lstrip("TYPE_").replace("STRING", "BYTES")
         for i in range(len(inputc))
     ]
-
+    if isinstance(inputs, tuple):
+        inputs = list(inputs)
+    assert isinstance(inputs, list), "Inputs must be a list or tuple"
     for i in range(len(inputs)):
         inputs[i] = _encode_input(inputs[i])
 
@@ -132,8 +136,13 @@ async def execute_model(
         results["__info__"] = info
         return results
 
+
 _config_cache = {}
-async def execute(*inputs, server_url=None, model_name=None, cache_config=True, **kwargs):
+
+
+async def execute(
+    inputs, server_url=None, model_name=None, cache_config=True, **kwargs
+):
     """
     Function for execute the model by passing a list of input tensors and using cached config
     """
@@ -145,7 +154,8 @@ async def execute(*inputs, server_url=None, model_name=None, cache_config=True, 
             config = _config_cache[(server_url, model_name)]
     else:
         config = await get_config(server_url, model_name)
-    return await execute_model(*inputs, config=config, server_url=server_url, model_name=model_name, **kwargs)
+    return await execute_model(inputs, config=config, **kwargs)
+
 
 # read version information from file
 VERSION_INFO = json.loads(
