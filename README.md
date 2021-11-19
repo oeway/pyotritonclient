@@ -41,27 +41,54 @@ The http client code is forked from [triton client git repo](https://github.com/
 
 
 To simplify the manipulation on stateful models with sequence, we also provide the `SequenceExecutor` to make it easier to run models in a sequence.
-```
+```python
 from pyotritonclient import SequenceExcutor
-(image, labels, info) = train_samples[0]
 
-model_id = 100
-async with SequenceExcutor(
-    server_url='https://ai.imjoy.io/triton',
-    model_name='cellpose-train',
-    auto_end=True,
-    sequence_id=model_id) as se:
 
-    for i in range(2):
-      print(await se.execute([
-                  image.astype('float32'),
-                  labels.astype('float32'),
-                  {"steps": 1, "pretrained_model": None}
-                ]))
+seq = SequenceExcutor(
+  server_url='https://ai.imjoy.io/triton',
+  model_name='cellpose-train',
+  sequence_id=100
+)
+inputs = [
+  image.astype('float32'),
+  labels.astype('float32'),
+  {"steps": 1, "resume": True}
+]
+for (image, labels, info) in train_samples:
+  result = await seq.step(inputs)
+
+result = await seq.end(inputs)
 ```
 
-Note that above example used `auto_end=True`, this means when exiting the block, the last inputs will be sent again to end the sequence.
-If you want to specify the inputs for the execution or obtain the results, you can run `result = await se.end(inputs)`.
+Note that above example called `seq.end()` by sending the last inputs again to end the sequence. If you want to specify the inputs for the execution, you can run `result = await se.end(inputs)`.
+
+For a small batch of data, you can also run it like this:
+```python
+from pyotritonclient import SequenceExcutor
+
+seq = SequenceExcutor(
+  server_url='https://ai.imjoy.io/triton',
+  model_name='cellpose-train',
+  sequence_id=100
+)
+
+# a list of inputs
+inputs_batch = [[
+  image.astype('float32'),
+  labels.astype('float32'),
+  {"steps": 1, "resume": True}
+] for (image, labels, _) in train_samples]
+
+def on_step(i, result):
+  """Function called on every step"""
+  print(i)
+
+results = await seq(inputs_batch, on_step=on_step)
+```
+
+
+
 ## Server setup
 Since we access the server from the browser environment which typically has more security restrictions, it is important that the server is configured to enable browser access.
 

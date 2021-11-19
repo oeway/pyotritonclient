@@ -1,4 +1,5 @@
 import json
+import asyncio
 from pathlib import Path
 
 import numpy as np
@@ -164,28 +165,68 @@ async def execute(
             config = _config_cache[(server_url, model_name)]
     else:
         config = await get_config(server_url, model_name)
+        _config_cache[(server_url, model_name)] = config
     return await execute_model(inputs, config=config, **kwargs)
+
+
+async def execute_batch(batches, batch_size=1, on_batch_end=None, **kwargs):
+    """
+    Function for execute the model by batching inputs
+    """
+    results = []
+    for b in range(0, len(batches), batch_size):
+        futs = []
+        for i in range(batch_size):
+            if b + i >= len(batches):
+                break
+            futs.append(execute(inputs=batches[b + i], **kwargs))
+        if len(futs) > 0:
+            batch_results = await asyncio.gather(*futs)
+            results.extend(batch_results)
+            if on_batch_end:
+                on_batch_end(b, batch_results)
+    return results
 
 
 class SequenceExcutor:
     """Execute a sequence by managing the sequence_start and sequence_end automatically"""
 
-    def __init__(self, auto_end=False, **kwargs) -> None:
+    def __init__(self, start=True, **kwargs) -> None:
         self.kwargs = kwargs
         if "sequence_id" not in kwargs:
             raise Exception("Please provide sequence_id")
-        self._seq_start = True
-        self._seq_end = False
+        self._seq_start = start
         self._last_args = None
-        self._auto_end = auto_end
 
-    async def execute(self, *args, **kwargs):
+    def reset(self):
+        self._seq_start = True
+        self._last_args = None
+
+    async def __call__(self, inputs_batch, on_step=None, **kwargs):
+        assert isinstance(inputs_batch, (tuple, list))
+        if len(inputs_batch) == 1:
+            assert isinstance(inputs_batch[0], (tuple, list))
+            result = await execute(
+                inputs_batch[0], sequence_start=True, sequence_end=True, **kwargs
+            )
+            self._seq_start = True
+        else:
+            results_batch = []
+            for i, inputs in enumerate(inputs_batch[:-1]):
+                assert isinstance(inputs, (tuple, list))
+                result = await self.step(inputs, **kwargs)
+                results_batch.append(result)
+                if on_step:
+                    on_step(i, result)
+            result = await self.end(inputs_batch[-1], **kwargs)
+        results_batch.append(result)
+        return results_batch
+
+    async def step(self, *args, **kwargs):
         if "sequence_start" in kwargs:
             raise Exception(
                 "sequence_start are not allowed keywords in sequence executor"
             )
-        if self._seq_end:
-            raise Exception("Sequence is already ended")
         kwargs.update(self.kwargs)
         self._last_args = (args, kwargs)
         if self._seq_start:
@@ -206,20 +247,11 @@ class SequenceExcutor:
                 args = _args
             kwargs.update(_kwargs)
         if self._seq_start:
-            self._seq_start = False
             kwargs["sequence_start"] = True
         kwargs["sequence_end"] = True
-        self._seq_end = True
-        return await execute(*args, **kwargs)
-
-    async def __aenter__(self):
+        # reset the sequence
         self._seq_start = True
-        return self
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        if self._auto_end and not self._seq_end and self._last_args:
-            (args, kwargs) = self._last_args
-            await execute(*args, sequence_start=False, sequence_end=True, **kwargs)
+        return await execute(*args, **kwargs)
 
 
 # read version information from file
