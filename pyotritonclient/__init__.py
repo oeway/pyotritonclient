@@ -131,12 +131,15 @@ async def execute_model(
                     results[k] = results[k].astype(np.bytes_)
                     data = []
                     for i in range(len(results[k])):
-                        v = str(np.char.decode(results[k][i], "UTF-8"))
-                        if decode_json:
-                            try:
-                                v = json.loads(v)
-                            except json.JSONDecodeError:
-                                pass
+                        try:
+                            v = str(np.char.decode(results[k][i], "UTF-8"))
+                            if decode_json:
+                                try:
+                                    v = json.loads(v)
+                                except json.JSONDecodeError:
+                                    pass
+                        except UnicodeDecodeError:
+                            v = results[k][i]
                         data.append(v)
                     results[k] = data
 
