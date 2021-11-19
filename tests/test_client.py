@@ -1,14 +1,9 @@
 import asyncio
-import io
 import imageio
-import numpy as np
-from pyotritonclient import get_config, execute_model
+from pyotritonclient import execute
 
 
 async def run():
-    # obtain the model config
-    config = await get_config("https://ai.imjoy.io/triton", "stardist")
-
     image = imageio.imread(
         "https://raw.githubusercontent.com/stardist/stardist/3451a4f9e7b6dcef91b09635cc8fa78939fb0d29/stardist/data/images/img2d.tif"
     )
@@ -16,7 +11,7 @@ async def run():
     param = {}
 
     # run inference
-    results = await execute_model([image, param], config=config, decode_bytes=True)
+    results = await execute(inputs=[image, param], server_url='https://ai.imjoy.io/triton', model_name='stardist', decode_bytes=True)
     mask = results["mask"]
     assert mask.shape == (512, 512)
 

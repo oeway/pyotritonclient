@@ -22,16 +22,13 @@ micropip.install("pyotritonclient")
 To execute the model, we provide utility functions to make it much easier:
 ```python
 import numpy as np
-from pyotritonclient import get_config, execute_model
-
-# obtain the model config
-config = await get_config('https://triton.imjoy.io', 'cellpose-cyto')
+from pyotritonclient import execute
 
 # create fake input tensors
 input0 = np.zeros([2, 349, 467], dtype='float32')
 input1 = np.array([30], dtype='float32')
 # run inference
-results = await execute_model([input0, input1], config=config)
+results = await execute(inputs=[input0, input1], server_url='https://ai.imjoy.io/triton', model_name='cellpose-python')
 ```
 
 You can access the lower level api, see the [test example](./tests/test_client.py).
