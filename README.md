@@ -61,7 +61,7 @@ async with SequenceExcutor(
 ```
 
 Note that above example used `auto_end=True`, this means when exiting the block, the last inputs will be sent again to end the sequence.
-If you don't want that, you can set `auto_end=False` and run `se.execute(..., sequence_end=True)` before exiting the block.
+If you want to specify the inputs for the execution or obtain the results, you can run `result = await se.end(inputs)`.
 ## Server setup
 Since we access the server from the browser environment which typically has more security restrictions, it is important that the server is configured to enable browser access.
 
