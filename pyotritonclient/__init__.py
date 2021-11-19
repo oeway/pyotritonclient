@@ -175,6 +175,7 @@ class SequenceExcutor:
         if "sequence_id" not in kwargs:
             raise Exception("Please provide sequence_id")
         self._seq_start = True
+        self._seq_end = False
         self._last_args = None
         self._auto_end = auto_end
 
@@ -183,21 +184,40 @@ class SequenceExcutor:
             raise Exception(
                 "sequence_start are not allowed keywords in sequence executor"
             )
+        if self._seq_end:
+            raise Exception("Sequence is already ended")
         kwargs.update(self.kwargs)
-        if self._auto_end:
-            self._last_args = (args, kwargs)
+        self._last_args = (args, kwargs)
         if self._seq_start:
             self._seq_start = False
             return await execute(*args, sequence_start=True, **kwargs)
         else:
             return await execute(*args, sequence_start=False, **kwargs)
 
+    async def end(self, *args, **kwargs):
+        if "sequence_end" in kwargs:
+            raise Exception(
+                "sequence_end are not allowed keywords in sequence executor"
+            )
+        kwargs.update(self.kwargs)
+        if self._last_args:
+            (_args, _kwargs) = self._last_args
+            if not args:
+                args = _args
+            kwargs.update(_kwargs)
+        if self._seq_start:
+            self._seq_start = False
+            kwargs["sequence_start"] = True
+        kwargs["sequence_end"] = True
+        self._seq_end = True
+        return await execute(*args, **kwargs)
+
     async def __aenter__(self):
         self._seq_start = True
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        if self._auto_end and self._last_args:
+        if self._auto_end and not self._seq_end and self._last_args:
             (args, kwargs) = self._last_args
             await execute(*args, sequence_start=False, sequence_end=True, **kwargs)
 
