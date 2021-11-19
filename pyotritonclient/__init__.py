@@ -141,7 +141,7 @@ _config_cache = {}
 
 
 async def execute(
-    inputs, server_url=None, model_name=None, cache_config=True, **kwargs
+    inputs=None, server_url=None, model_name=None, cache_config=True, **kwargs
 ):
     """
     Function for execute the model by passing a list of input tensors and using cached config
@@ -155,6 +155,41 @@ async def execute(
     else:
         config = await get_config(server_url, model_name)
     return await execute_model(inputs, config=config, **kwargs)
+
+
+class SequenceExcutor:
+    """Execute a sequence by managing the sequence_start and sequence_end automatically"""
+
+    def __init__(self, auto_end=False, **kwargs) -> None:
+        self.kwargs = kwargs
+        if "sequence_id" not in kwargs:
+            raise Exception("Please provide sequence_id")
+        self._seq_start = True
+        self._last_args = None
+        self._auto_end = auto_end
+
+    async def execute(self, *args, **kwargs):
+        if "sequence_start" in kwargs:
+            raise Exception(
+                "sequence_start are not allowed keywords in sequence executor"
+            )
+        kwargs.update(self.kwargs)
+        if self._auto_end:
+            self._last_args = (args, kwargs)
+        if self._seq_start:
+            self._seq_start = False
+            return await execute(*args, sequence_start=True, **kwargs)
+        else:
+            return await execute(*args, sequence_start=False, **kwargs)
+
+    async def __aenter__(self):
+        self._seq_start = True
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if self._auto_end and self._last_args:
+            (args, kwargs) = self._last_args
+            await execute(*args, sequence_start=False, sequence_end=True, **kwargs)
 
 
 # read version information from file

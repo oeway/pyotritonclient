@@ -11,7 +11,12 @@ async def run():
     param = {}
 
     # run inference
-    results = await execute(inputs=[image, param], server_url='https://ai.imjoy.io/triton', model_name='stardist', decode_bytes=True)
+    results = await execute(
+        inputs=[image, param],
+        server_url="https://ai.imjoy.io/triton",
+        model_name="stardist",
+        decode_bytes=True,
+    )
     mask = results["mask"]
     assert mask.shape == (512, 512)
 

@@ -40,6 +40,28 @@ change the http client code into async style. For example, instead of doing `cli
 The http client code is forked from [triton client git repo](https://github.com/triton-inference-server/client) since commit [b3005f9db154247a4c792633e54f25f35ccadff0](https://github.com/triton-inference-server/client/tree/b3005f9db154247a4c792633e54f25f35ccadff0).
 
 
+To simplify the manipulation on stateful models with sequence, we also provide the `SequenceExecutor` to make it easier to run models in a sequence.
+```
+from pyotritonclient import SequenceExcutor
+(image, labels, info) = train_samples[0]
+
+model_id = 100
+async with SequenceExcutor(
+    server_url='https://ai.imjoy.io/triton',
+    model_name='cellpose-train',
+    auto_end=True,
+    sequence_id=model_id) as se:
+
+    for i in range(2):
+      print(await se.execute([
+                  image.astype('float32'),
+                  labels.astype('float32'),
+                  {"steps": 1, "pretrained_model": None}
+                ]))
+```
+
+Note that above example used `auto_end=True`, this means when exiting the block, the last inputs will be sent again to end the sequence.
+If you don't want that, you can set `auto_end=False` and run `se.execute(..., sequence_end=True)` before exiting the block.
 ## Server setup
 Since we access the server from the browser environment which typically has more security restrictions, it is important that the server is configured to enable browser access.
 
