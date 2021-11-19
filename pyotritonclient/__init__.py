@@ -44,6 +44,7 @@ async def execute_model(
     model_version="",
     compression_algorithm="deflate",
     decode_bytes=False,
+    decode_json=False,
     verbose=False,
     **kwargs,
 ):
@@ -123,15 +124,21 @@ async def execute_model(
             for output in info["outputs"]
         }
 
-        if decode_bytes:
+        if decode_bytes or decode_json:
             for k in results:
                 # decode bytes to utf-8
                 if results[k].dtype == np.object_:
                     results[k] = results[k].astype(np.bytes_)
-                    results[k] = [
-                        str(np.char.decode(results[k][i], "UTF-8"))
-                        for i in range(len(results[k]))
-                    ]
+                    data = []
+                    for i in range(len(results[k])):
+                        v = str(np.char.decode(results[k][i], "UTF-8"))
+                        if decode_json:
+                            try:
+                                v = json.loads(v)
+                            except json.JSONDecodeError:
+                                pass
+                        data.append(v)
+                    results[k] = data
 
         results["__info__"] = info
         return results
