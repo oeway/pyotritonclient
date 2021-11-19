@@ -17,6 +17,20 @@ async def get_config(server_url, model_name, verbose=False):
         response["model_name"] = model_name
         return response
 
+def _encode_input(data):
+    # automatically encode string and dict into np.bytes_
+    if isinstance(data, str):
+        bytes_data = str.encode(data, "utf-8")
+        in_data = np.array([bytes_data], dtype=np.object_)
+    elif isinstance(data, dict):
+        # encode the dictionary as as np.object_
+        bytes_data = str.encode(json.dumps(data), "utf-8")
+        in_data = np.array([bytes_data], dtype=np.object_)
+    elif isinstance(data, (tuple, list)):
+        in_data = np.stack(list(map(_encode_input, data)), axis=0)
+    else:
+        in_data = data
+    return in_data
 
 async def execute_model(
     inputs,
@@ -55,14 +69,7 @@ async def execute_model(
     ]
 
     for i in range(len(inputs)):
-        # automatically encode string and dict into np.bytes_
-        if isinstance(inputs[i], str):
-            bytes_data = str.encode(inputs[i], "utf-8")
-            inputs[i] = np.array([bytes_data], dtype=np.object_)
-        if isinstance(inputs[i], dict):
-            # encode the dictionary as as np.object_
-            bytes_data = str.encode(json.dumps(inputs[i]), "utf-8")
-            inputs[i] = np.array([bytes_data], dtype=np.object_)
+        inputs[i] = _encode_input(inputs[i])
 
         if inputs[i].dtype != triton_to_np_dtype(input_types[i]):
             if not (
@@ -125,6 +132,20 @@ async def execute_model(
         results["__info__"] = info
         return results
 
+_config_cache = {}
+async def execute(*inputs, server_url=None, model_name=None, cache_config=True, **kwargs):
+    """
+    Function for execute the model by passing a list of input tensors and using cached config
+    """
+    if cache_config:
+        if (server_url, model_name) not in _config_cache:
+            config = await get_config(server_url, model_name)
+            _config_cache[(server_url, model_name)] = config
+        else:
+            config = _config_cache[(server_url, model_name)]
+    else:
+        config = await get_config(server_url, model_name)
+    return await execute_model(*inputs, config=config, server_url=server_url, model_name=model_name, **kwargs)
 
 # read version information from file
 VERSION_INFO = json.loads(
