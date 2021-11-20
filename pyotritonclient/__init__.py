@@ -227,31 +227,35 @@ class SequenceExcutor:
             raise Exception(
                 "sequence_start are not allowed keywords in sequence executor"
             )
-        kwargs.update(self.kwargs)
-        self._last_args = (args, kwargs)
+        current_kwargs = {}
+        current_kwargs.update(self.kwargs)
+        current_kwargs.update(kwargs)
+        self._last_args = (args, current_kwargs)
         if self._seq_start:
             self._seq_start = False
-            return await execute(*args, sequence_start=True, **kwargs)
+            return await execute(*args, sequence_start=True, **current_kwargs)
         else:
-            return await execute(*args, sequence_start=False, **kwargs)
+            return await execute(*args, sequence_start=False, **current_kwargs)
 
     async def end(self, *args, **kwargs):
         if "sequence_end" in kwargs:
             raise Exception(
                 "sequence_end are not allowed keywords in sequence executor"
             )
-        kwargs.update(self.kwargs)
+        current_kwargs = {}
+        current_kwargs.update(self.kwargs)
         if self._last_args:
             (_args, _kwargs) = self._last_args
             if not args:
                 args = _args
-            kwargs.update(_kwargs)
+            current_kwargs.update(_kwargs)
+        current_kwargs.update(kwargs)
         if self._seq_start:
-            kwargs["sequence_start"] = True
-        kwargs["sequence_end"] = True
+            current_kwargs["sequence_start"] = True
+        current_kwargs["sequence_end"] = True
         # reset the sequence
         self._seq_start = True
-        return await execute(*args, **kwargs)
+        return await execute(*args, **current_kwargs)
 
 
 # read version information from file
