@@ -1,4 +1,3 @@
-import asyncio
 import pickle
 import urllib.request
 
