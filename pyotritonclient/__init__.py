@@ -129,11 +129,11 @@ async def execute_model(
             for k in results:
                 # decode bytes to utf-8
                 if results[k].dtype == np.object_:
-                    results[k] = results[k].astype(np.bytes_)
+                    bytes_array = results[k].astype(np.bytes_)
                     data = []
-                    for i in range(len(results[k])):
+                    for i in range(len(bytes_array)):
                         try:
-                            v = str(np.char.decode(results[k][i], "UTF-8"))
+                            v = str(np.char.decode(bytes_array[i], "UTF-8"))
                             if decode_json:
                                 try:
                                     v = json.loads(v)
