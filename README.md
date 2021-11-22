@@ -40,7 +40,7 @@ from pyotritonclient import execute
 
 async def run():
     results = await execute(inputs=[np.zeros([2, 349, 467], dtype='float32'), {"diameter": 30}], server_url='https://ai.imjoy.io/triton', model_name='cellpose-python')
-    print(result)
+    print(results)
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(run())
