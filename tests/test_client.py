@@ -52,7 +52,7 @@ async def test_sequence_batch(example_dataset):
     for (image, labels, info) in example_dataset:
         inputs = [
             image.astype("float32"),
-            labels.astype("float32"),
+            labels.astype("uint16"),
             {"steps": 1, "resume": True},
         ]
         input_sequence.append(inputs)
@@ -73,7 +73,7 @@ async def test_sequence(example_dataset):
         for (image, labels, info) in example_dataset:
             inputs = [
                 image.astype("float32"),
-                labels.astype("float32"),
+                labels.astype("uint16"),
                 {"steps": 1, "resume": True},
             ]
             result = await seq.step(inputs)
