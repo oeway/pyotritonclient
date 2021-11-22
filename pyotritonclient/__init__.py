@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 
 import pyotritonclient.http as httpclient
-from pyotritonclient.utils import np_to_triton_dtype, triton_to_np_dtype
+from pyotritonclient.utils import triton_to_np_dtype
 
 
 async def get_config(server_url, model_name, verbose=False):

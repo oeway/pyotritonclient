@@ -42,12 +42,11 @@ def req_file(filename):
 
 install_requires = req_file("requirements.txt")
 VERSION = json.loads(read("pyotritonclient/VERSION"))["version"]
-
-try:
-    import pyodide
-except ImportError:
-    install_requires.extend(["requests", "python-rapidjson>=0.9.1"])
-
+# only for native python, not pyodide
+install_requires.extend([
+    "requests;platform_system!='Emscripten'",
+    "python-rapidjson>=0.9.1;platform_system!='Emscripten'"
+])
 data_files = [
     ("", ["LICENSE.txt"]),
 ]
