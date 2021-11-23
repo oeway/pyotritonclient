@@ -11,10 +11,8 @@ results = await execute(
     ) # this execute function exectues the model (specified by model_name) on the server and return results. execute is an async function, it should used with await.
 
 Currently, the server https://ai.imjoy.io/triton supports the following models:
-    1. "cellpose-python" for image segmentation with the cellpose model, it requires two inputs, the first one is a image numpy array with 3 dimensions and the data type should be float32, the second one is a dictionary for the parameters, the available parameters is "diameter" for specifiy the object size and "channels" to specify the cell and nuclei channel, the default channels value is [1, 2]. The returned results is a dictionary contains a key named "mask" (results["mask"]) for the mask image. To display the image, use "plt.imshow(mask[0, :, :])". To get region properties and morphological features from the mask, use the "regionprops_table" function from scikit-image (the available property names are the same as the regionprops function).
-    2. "stardist" for image segmentation with the stardist model: similar to "cellpose-python", it also requires two inputs and has the same input format, however, the second input should be an empty dictionary. The returned results is the same as cellpose model.
-
-
+    1. "cellpose-python" for image segmentation with the cellpose model, it requires two inputs, the first one is a image numpy array with 3 dimensions and the data type should be float32, the second one is a dictionary for the parameters, the available parameters is "diameter" for specifiy the object size and "channels" to specify the cell and nuclei channel, the default channels value is [1, 2]. The returned results is a dictionary contains a key named "mask" (results["mask"]) for the mask image. To display the image, use "plt.imshow(mask[0, :, :])". To get region properties and morphological features from the mask, use the "regionprops_table" function from scikit-image (the available property names are the same as the regionprops function, except "mean_intensity").
+    2. "stardist" for image segmentation with the stardist model: similar to "cellpose-python", it also requires two inputs and has the same input format, however, the first input should be a single channel image with uint16 type and the second input should be an empty dictionary. The returned results contains a mask with a single channel can be displayed "plt.imshow(mask)".
 
 To train cellpose models, here is an example:
 
