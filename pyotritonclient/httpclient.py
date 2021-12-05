@@ -18,6 +18,8 @@ class HTTPResponse:
         # Since the decoding will be handled by requests
         if key.lower() == "content-encoding":
             return None
+        if key.lower() == "content-length":
+            return str(len(self._body_buffer))
         return self._response.headers.get(key)
 
     def get(self, key, default=None):
@@ -25,6 +27,8 @@ class HTTPResponse:
         # Since the decoding will be handled by requests
         if key.lower() == "content-encoding":
             return None
+        if key.lower() == "content-length":
+            return str(len(self._body_buffer))
         return self._response.headers.get(key) or default
 
     def read(self, length=None):

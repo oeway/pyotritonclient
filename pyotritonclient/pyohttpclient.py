@@ -17,12 +17,16 @@ class HTTPResponse:
         # Make sure we don't expose the Content-Encoding header in the browser
         if key.lower() == "content-encoding":
             return None
+        if key.lower() == "content-length":
+            return str(self._body_buffer.length)
         return self._js_response.headers.get(key)
 
     def get(self, key, default=None):
         # Make sure we don't expose the Content-Encoding header in the browser
         if key.lower() == "content-encoding":
             return default
+        if key.lower() == "content-length":
+            return str(self._body_buffer.length)
         return self._js_response.headers.get(key) or default
 
     def read(self, length=None):
