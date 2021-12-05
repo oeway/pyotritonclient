@@ -43,7 +43,7 @@ async def execute_model(
     select_outputs=None,
     request_id="",
     model_version="",
-    compression_algorithm="deflate",
+    compression_algorithm="gzip",
     decode_bytes=False,
     decode_json=False,
     verbose=False,
