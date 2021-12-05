@@ -14,15 +14,9 @@ class HTTPResponse:
         self._buffer_pointer = 0
 
     def __getitem__(self, key):
-        # Make sure we don't expose the Content-Encoding header in the browser
-        if key.lower() == "content-encoding":
-            return None
         return self._js_response.headers.get(key)
 
     def get(self, key, default=None):
-        # Make sure we don't expose the Content-Encoding header in the browser
-        if key.lower() == "content-encoding":
-            return default
         return self._js_response.headers.get(key) or default
 
     def read(self, length=None):
