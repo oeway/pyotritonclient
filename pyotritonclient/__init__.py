@@ -73,6 +73,8 @@ async def execute_model(
     ]
     if isinstance(inputs, tuple):
         inputs = list(inputs)
+    if isinstance(inputs, dict):
+        inputs = [inputs[name] for name in input_names]
     assert isinstance(inputs, list), "Inputs must be a list or tuple"
     for i in range(len(inputs)):
         inputs[i] = _encode_input(inputs[i])
