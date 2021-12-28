@@ -21,9 +21,8 @@ class HTTPResponse:
 
     def get(self, key, default=None):
         if "Content-Encoding" == key:
-            if (
-                self.expose_headers
-                and "Content-Encoding" not in self.expose_headers
+            if self.expose_headers is None or (
+                "Content-Encoding" not in self.expose_headers
                 and "content-encoding" not in self.expose_headers
             ):
                 return None
