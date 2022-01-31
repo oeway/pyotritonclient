@@ -12,11 +12,20 @@ class HTTPResponse:
         self._js_response = js_response
         self._body_buffer = body_buffer
         self._buffer_pointer = 0
+        self.expose_headers = self._js_response.headers.get(
+            "Access-Control-Expose-Headers"
+        )
 
     def __getitem__(self, key):
         return self._js_response.headers.get(key)
 
     def get(self, key, default=None):
+        if "content-encoding" == key.lower():
+            if self.expose_headers is None or (
+                "Content-Encoding" not in self.expose_headers
+                and "content-encoding" not in self.expose_headers
+            ):
+                return None
         return self._js_response.headers.get(key) or default
 
     def read(self, length=None):
