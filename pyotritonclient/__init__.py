@@ -44,6 +44,7 @@ async def execute_model(
     request_id="",
     model_version="",
     compression_algorithm="gzip",
+    serialization="triton",
     decode_bytes=False,
     decode_json=False,
     verbose=False,
@@ -67,26 +68,42 @@ async def execute_model(
     ), f"Invalid inputs number: {len(inputs)}, it should be {len(inputc)}"
     input_names = [inputc[i]["name"] for i in range(len(inputc))]
     output_names = [outputc[i]["name"] for i in range(len(outputc))]
-    input_types = [
-        inputc[i]["data_type"].lstrip("TYPE_").replace("STRING", "BYTES")
-        for i in range(len(inputc))
-    ]
     if isinstance(inputs, tuple):
         inputs = list(inputs)
     if isinstance(inputs, dict):
         inputs = [inputs[name] for name in input_names]
     assert isinstance(inputs, list), "Inputs must be a list or tuple"
-    for i in range(len(inputs)):
-        inputs[i] = _encode_input(inputs[i])
 
-        if inputs[i].dtype != triton_to_np_dtype(input_types[i]):
-            if not (
-                inputs[i].dtype == np.bytes_
-                and triton_to_np_dtype(input_types[i]) == np.object_
-            ):
-                raise TypeError(
-                    f"Input ({i}: {input_names[i]}) data type mismatch: {inputs[i].dtype} (should be {triton_to_np_dtype(input_types[i])})"
-                )
+    assert serialization in ["triton", "imjoy"]
+
+    if serialization == "triton":
+        input_types = [
+            inputc[i]["data_type"].lstrip("TYPE_").replace("STRING", "BYTES")
+            for i in range(len(inputc))
+        ]
+
+        for i in range(len(inputs)):
+            inputs[i] = _encode_input(inputs[i])
+
+            if inputs[i].dtype != triton_to_np_dtype(input_types[i]):
+                if not (
+                    inputs[i].dtype == np.bytes_
+                    and triton_to_np_dtype(input_types[i]) == np.object_
+                ):
+                    raise TypeError(
+                        f"Input ({i}: {input_names[i]}) data type mismatch: {inputs[i].dtype} (should be {triton_to_np_dtype(input_types[i])})"
+                    )
+    else:
+        from imjoy_rpc.hypha import RPC
+        import msgpack
+
+        _rpc = RPC(None, "anon")
+        input_types = []
+        for i in range(len(inputs)):
+            data = _rpc.encode(inputs[i])
+            bytes_data = msgpack.dumps(data)
+            inputs[i] = np.array([bytes_data], dtype=np.object_)
+            input_types.append("BYTES")
 
     if select_outputs:
         for out in select_outputs:
@@ -126,25 +143,34 @@ async def execute_model(
             output["name"]: response.as_numpy(output["name"])
             for output in info["outputs"]
         }
-
-        if decode_bytes or decode_json:
+        if serialization == "triton":
+            if decode_bytes or decode_json:
+                for k in results:
+                    # decode bytes to utf-8
+                    if results[k].dtype == np.object_:
+                        bytes_array = results[k].astype(np.bytes_)
+                        data = []
+                        for i in range(len(bytes_array)):
+                            try:
+                                v = str(np.char.decode(bytes_array[i], "UTF-8"))
+                                if decode_json:
+                                    try:
+                                        v = json.loads(v)
+                                    except json.JSONDecodeError:
+                                        pass
+                            except UnicodeDecodeError:
+                                v = results[k][i]
+                            data.append(v)
+                        results[k] = data
+        else:
+            assert (
+                not decode_bytes and not decode_json
+            ), "decode_json or decode_json cannot be True for imjoy serialization method"
             for k in results:
-                # decode bytes to utf-8
                 if results[k].dtype == np.object_:
-                    bytes_array = results[k].astype(np.bytes_)
-                    data = []
-                    for i in range(len(bytes_array)):
-                        try:
-                            v = str(np.char.decode(bytes_array[i], "UTF-8"))
-                            if decode_json:
-                                try:
-                                    v = json.loads(v)
-                                except json.JSONDecodeError:
-                                    pass
-                        except UnicodeDecodeError:
-                            v = results[k][i]
-                        data.append(v)
-                    results[k] = data
+                    bytes_array = results[k].astype(np.bytes_)[0].item()
+                    data = msgpack.loads(bytes_array)
+                    results[k] = _rpc.decode(data)
 
         results["__info__"] = info
         return results

@@ -47,6 +47,8 @@ install_requires.extend(
     [
         "requests;platform_system!='Emscripten'",
         "python-rapidjson>=0.9.1;platform_system!='Emscripten'",
+        "imjoy-rpc>=0.5.7",
+        "msgpack",
     ]
 )
 data_files = [
