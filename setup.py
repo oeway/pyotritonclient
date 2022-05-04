@@ -47,7 +47,6 @@ install_requires.extend(
     [
         "requests;platform_system!='Emscripten'",
         "python-rapidjson>=0.9.1;platform_system!='Emscripten'",
-        "imjoy-rpc>=0.5.7",
         "msgpack",
     ]
 )
@@ -96,6 +95,7 @@ setup(
         "Operating System :: OS Independent",
     ],
     install_requires=install_requires,
+    extras_require={"imjoy": ["imjoy-rpc"]},
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
