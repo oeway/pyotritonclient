@@ -34,13 +34,13 @@ async def test_model():
         "float32"
     )
     kwargs = {"inputs": [image], "model_id": "10.5281/zenodo.5869899"}
-    results = await execute(
+    ret = await execute(
         [kwargs],
-        server_url="https://ai.imjoy.io/triton",
+        server_url="http://localhost:8000",
         model_name="bioengine-model-runner",
         serialization="imjoy",
     )
-    result = results["outputs"]
+    result = ret["result"]
     assert result["success"] == True, result["error"]
     assert result["outputs"][0].shape == (1, 2, 128, 128), str(
         result["outputs"][0].shape
@@ -58,7 +58,7 @@ async def test_execute():
     # run inference
     results = await execute(
         inputs=[image, param],
-        server_url="https://ai.imjoy.io/triton",
+        server_url="http://localhost:8000",
         model_name="stardist",
         decode_bytes=True,
     )

@@ -53,7 +53,7 @@ class HttpClient:
 
     async def get(self, request_uri, headers=None):
         request_uri = self._normalize_uri(request_uri)
-        async with httpx.AsyncClient(timeout=600) as client:
+        async with httpx.AsyncClient(timeout=30) as client:
             resp = await client.get(request_uri, headers=headers)
             _body_buffer = resp.content
             return HTTPResponse(resp, _body_buffer)
@@ -66,7 +66,7 @@ class HttpClient:
             pass
         elif isinstance(body, str):
             raise TypeError("Unsupported type: " + str(type(body)))
-        async with httpx.AsyncClient(timeout=600) as client:
+        async with httpx.AsyncClient(timeout=30) as client:
             resp = await client.post(request_uri, data=body, headers=headers)
             _body_buffer = resp.content
             return HTTPResponse(resp, _body_buffer)
