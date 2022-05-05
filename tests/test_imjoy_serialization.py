@@ -3,6 +3,7 @@ import msgpack
 import numpy as np
 import asyncio
 from pyotritonclient import execute
+import imageio
 
 _rpc = RPC(None, "anon")
 
@@ -35,7 +36,7 @@ async def test_model():
     kwargs = {"inputs": [image], "model_id": "10.5281/zenodo.5869899"}
     results = await execute(
         [kwargs],
-        server_url="http://localhost:5000",
+        server_url="https://ai.imjoy.io/triton",
         model_name="bioengine-model-runner",
         serialization="imjoy",
     )
@@ -46,5 +47,23 @@ async def test_model():
     )
     print("Test passed")
 
+async def test_execute():
+    image = imageio.imread(
+        "https://raw.githubusercontent.com/stardist/stardist/3451a4f9e7b6dcef91b09635cc8fa78939fb0d29/stardist/data/images/img2d.tif"
+    )
+    image = image.astype("uint16")
+    param = {}
 
+    # run inference
+    results = await execute(
+        inputs=[image, param],
+        server_url="https://ai.imjoy.io/triton",
+        model_name="stardist",
+        decode_bytes=True,
+    )
+    mask = results["mask"]
+    assert mask.shape == (512, 512)
+    print('stardist test passed')
+
+asyncio.run(test_execute())
 asyncio.run(test_model())

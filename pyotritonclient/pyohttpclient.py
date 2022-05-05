@@ -8,7 +8,6 @@ class HTTPResponse:
         self.method = method.upper()
         self.status_message = None
         self.status_code = js_response.status
-        self.msg = js_response.statusText
         self._js_response = js_response
         self._body_buffer = body_buffer
         self._buffer_pointer = 0

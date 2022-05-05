@@ -45,7 +45,7 @@ VERSION = json.loads(read("pyotritonclient/VERSION"))["version"]
 # only for native python, not pyodide
 install_requires.extend(
     [
-        "requests;platform_system!='Emscripten'",
+        "httpx;platform_system!='Emscripten'",
         "python-rapidjson>=0.9.1;platform_system!='Emscripten'",
         "msgpack",
     ]

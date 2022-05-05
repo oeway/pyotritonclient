@@ -1,6 +1,5 @@
 import json
-import requests
-import asyncio
+import httpx
 
 
 class HTTPResponse:
@@ -8,7 +7,6 @@ class HTTPResponse:
         self.method = method.upper()
         self.status_message = None
         self.status_code = response.status_code
-        self.msg = response.reason
         self._response = response
         self._body_buffer = body_buffer
         self._buffer_pointer = 0
@@ -55,9 +53,10 @@ class HttpClient:
 
     async def get(self, request_uri, headers=None):
         request_uri = self._normalize_uri(request_uri)
-        resp = requests.get(request_uri, headers=headers)
-        _body_buffer = resp.content
-        return HTTPResponse(resp, _body_buffer)
+        async with httpx.AsyncClient(timeout=600) as client:
+            resp = await client.get(request_uri, headers=headers)
+            _body_buffer = resp.content
+            return HTTPResponse(resp, _body_buffer)
 
     async def post(self, request_uri, body=None, headers=None):
         request_uri = self._normalize_uri(request_uri)
@@ -67,7 +66,7 @@ class HttpClient:
             pass
         elif isinstance(body, str):
             raise TypeError("Unsupported type: " + str(type(body)))
-
-        resp = requests.post(request_uri, data=body, headers=headers)
-        _body_buffer = resp.content
-        return HTTPResponse(resp, _body_buffer)
+        async with httpx.AsyncClient(timeout=600) as client:
+            resp = await client.post(request_uri, data=body, headers=headers)
+            _body_buffer = resp.content
+            return HTTPResponse(resp, _body_buffer)
