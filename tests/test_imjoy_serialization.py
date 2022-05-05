@@ -47,6 +47,7 @@ async def test_model():
     )
     print("Test passed")
 
+
 async def test_execute():
     image = imageio.imread(
         "https://raw.githubusercontent.com/stardist/stardist/3451a4f9e7b6dcef91b09635cc8fa78939fb0d29/stardist/data/images/img2d.tif"
@@ -63,7 +64,8 @@ async def test_execute():
     )
     mask = results["mask"]
     assert mask.shape == (512, 512)
-    print('stardist test passed')
+    print("stardist test passed")
+
 
 asyncio.run(test_execute())
 asyncio.run(test_model())
