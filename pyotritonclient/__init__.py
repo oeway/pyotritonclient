@@ -63,9 +63,10 @@ async def execute_model(
         model_name = config["model_name"]
 
     inputc, outputc = config["input"], config["output"]
-    assert len(inputc) == len(
-        inputs
-    ), f"Invalid inputs number: {len(inputs)}, it should be {len(inputc)}"
+    # Disable length check since the inputs can be optional
+    # assert len(inputc) == len(
+    #     inputs
+    # ), f"Invalid inputs number: {len(inputs)}, it should be {len(inputc)}"
     input_names = [inputc[i]["name"] for i in range(len(inputc))]
     output_names = [outputc[i]["name"] for i in range(len(outputc))]
     if isinstance(inputs, tuple):
