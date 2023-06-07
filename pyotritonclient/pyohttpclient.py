@@ -1,5 +1,9 @@
 import json
-from pyodide import to_js
+try:
+    from pyodide.ffi import to_js
+except ImportError:
+    from pyodide import to_js
+
 from js import Object, fetch
 
 
